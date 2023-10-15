@@ -1,3 +1,3 @@
-from table import meta
+from table import Base
 from engine import engine
-meta.create_all(engine)  # Creates the table
+Base.metadata.create_all(engine)

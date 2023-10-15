@@ -1,7 +1,9 @@
 import logging
-from telegram.ext import Updater, CommandHandler, ConversationHandler
+from telegram.ext import Updater, CommandHandler, ConversationHandler, CallbackQueryHandler
 from bot import config
 from bot.handlers import user
+from bot.handlers import word
+from bot.keyboards import user as user_keyboard
 # Enable logging
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
@@ -18,7 +20,11 @@ def main() -> None:
     # Get the dispatcher to register handlers
     dispatcher = updater.dispatcher
     conv_handler = ConversationHandler(
-        entry_points=[CommandHandler('start', user.start)],
+        entry_points=[
+            CommandHandler('start', user.start),
+            CallbackQueryHandler(
+                word.new_words, pattern=user_keyboard.NEW_WORDS_KEY),
+        ],
         states={
             # GENDER: [MessageHandler(Filters.regex('^(Boy|Girl|Other)$'), gender)],
             # PHOTO: [MessageHandler(Filters.photo, photo), CommandHandler('skip', skip_photo)],

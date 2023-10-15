@@ -1,7 +1,9 @@
+from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Table, Column, Integer, String, MetaData, DateTime, ForeignKey, Enum
 import datetime
 import enum
 meta = MetaData()
+Base = declarative_base()
 
 UsersTable = Table(
     'users', meta,
@@ -14,19 +16,18 @@ UsersTable = Table(
            onupdate=datetime.datetime.now)
 )
 
-WordsTable = Table(
-    'words', meta,
-    Column('id', Integer, primary_key=True, autoincrement=True),
-    Column('word', String),
-    Column('word_translation', String),
-    Column('photo', String, nullable=True),
-    Column('audio', String, nullable=True),
 
+class WordsTable(Base):
+    __tablename__ = 'words'
 
-    Column('created_at', DateTime, default=datetime.datetime.now),
-    Column('updated_at', DateTime, default=datetime.datetime.now,
-           onupdate=datetime.datetime.now)
-)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    word = Column(String)
+    word_translation = Column(String)
+    photo = Column(String, nullable=True)
+    audio = Column(String, nullable=True)
+    created_at = Column(DateTime, default=datetime.datetime.now)
+    updated_at = Column(DateTime, default=datetime.datetime.now,
+                        onupdate=datetime.datetime.now)
 
 
 class StatusEnum(enum.Enum):
@@ -34,16 +35,13 @@ class StatusEnum(enum.Enum):
     learn = 2
 
 
-UsersWordsTable = Table(
-    'users_words', meta,
-    Column('id', Integer, primary_key=True, autoincrement=True),
+class UsersWordsTable(Base):
+    __tablename__ = 'users_words'
 
-    Column('user_id', Integer, ForeignKey('users.id')),
-    Column('word_id', Integer, ForeignKey('words.id')),
-
-    Column('status', Enum(StatusEnum)),
-
-    Column('created_at', DateTime, default=datetime.datetime.now),
-    Column('updated_at', DateTime, default=datetime.datetime.now,
-           onupdate=datetime.datetime.now)
-)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey('users.id'))
+    word_id = Column(Integer, ForeignKey('words.id'))
+    status = Column(Enum(StatusEnum))
+    created_at = Column(DateTime, default=datetime.datetime.now)
+    updated_at = Column(DateTime, default=datetime.datetime.now,
+                        onupdate=datetime.datetime.now)
