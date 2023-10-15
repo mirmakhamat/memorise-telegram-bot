@@ -11,4 +11,7 @@ def new_words(update: Update, context: CallbackContext) -> None:
 
     query.answer()
     word = get_user_word(query.from_user.id)
-    query.edit_message_text(text=f"Edited message {word.word}")
+    if word:
+        query.edit_message_text(text=f"Edited message {word.word}")
+    else:
+        query.edit_message_text(text="No words")
