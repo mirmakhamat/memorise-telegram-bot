@@ -24,6 +24,12 @@ def main() -> None:
             CommandHandler('start', user.start),
             CallbackQueryHandler(
                 word.new_words, pattern=user_keyboard.NEW_WORDS_KEY),
+            CallbackQueryHandler(
+                word.review_words, pattern=user_keyboard.REVIEW_KEY),
+            CallbackQueryHandler(
+                word.update_words, pattern='^known-'),
+            CallbackQueryHandler(
+                word.update_words, pattern='^learn-'),
         ],
         states={
             # GENDER: [MessageHandler(Filters.regex('^(Boy|Girl|Other)$'), gender)],
