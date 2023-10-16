@@ -1,5 +1,5 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Table, Column, Integer, String, MetaData, DateTime, ForeignKey, Enum
+from sqlalchemy import Table, Column, Integer, BigInteger, String, MetaData, DateTime, ForeignKey, Enum
 import datetime
 import enum
 meta = MetaData()
@@ -12,7 +12,7 @@ class UsersTable(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     first_name = Column(String)
     last_name = Column(String)
-    telegram_id = Column(Integer, unique=True)
+    telegram_id = Column(BigInteger, unique=True)
 
     created_at = Column(DateTime, default=datetime.datetime.now)
     updated_at = Column(DateTime, default=datetime.datetime.now,

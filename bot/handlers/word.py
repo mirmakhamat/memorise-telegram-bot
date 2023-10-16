@@ -1,116 +1,119 @@
-
-from telegram import Update, ForceReply
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
-from db.functions.user import register
-from bot.keyboards.user import main_keyboard_markup
-from db.functions.word import get_user_word, users_words_create, get_user_review_word
+from telegram import Update, InputMediaPhoto
+from telegram.ext import CallbackContext
+from bot.keyboards.word import word_keyboard_markup, back_keyboard_markup, REVIEW_KEY, WORD_KEY
+from db.functions.word import get_user_word, users_words_create, get_user_review_word, get_word
 from db.functions.user import get_user_data
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-
-
-def new_words(update: Update, context: CallbackContext) -> None:
-    query = update.callback_query
-
-    query.answer()
-    user = get_user_data(query.from_user.id)
-    word = get_user_word(user.id)
-
-    if word:
-
-        word_keyboard = [
-            [
-                InlineKeyboardButton(
-                    "✅ Known", callback_data=f"known-{word.id}-{user.id}-1"),
-                InlineKeyboardButton(
-                    "♻️ Learn", callback_data=f"learn-{word.id}-{user.id}-2"),
-            ],
-
-        ]
-
-        word_keyboard_markup = InlineKeyboardMarkup(word_keyboard)
-
-        query.edit_message_text(
-            text=f"{word.word}", reply_markup=word_keyboard_markup)
-    else:
-        query.edit_message_text(text="No words")
 
 
 def update_words(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
     data = query.data.split('-')
     query.answer()
+
     if len(data) > 3:
         users_words_create(data[2], data[1], data[3])
+
     user = get_user_data(query.from_user.id)
     word = get_user_word(user.id)
-    print(word)
+
     if word:
-        word_keyboard = [
-            [
-                InlineKeyboardButton(
-                    "✅ Known", callback_data=f"known-{word.id}-{user.id}-1"),
-                InlineKeyboardButton(
-                    "♻️ Learn", callback_data=f"learn-{word.id}-{user.id}-2"),
-            ],
-
-        ]
-
-        word_keyboard_markup = InlineKeyboardMarkup(word_keyboard)
-        query.edit_message_text(
-            text=f"{word.word}", reply_markup=word_keyboard_markup)
+        reply_markup = word_keyboard_markup(WORD_KEY, word.id, user.id, word.audio)
+        text = word.word
+        if word.photo:
+            if query.message.photo:
+                query.edit_message_media(
+                    media=InputMediaPhoto(word.photo),
+                    caption=text, 
+                    reply_markup=reply_markup
+                )
+            else:
+                query.message.reply_photo(
+                    photo=word.photo, 
+                    caption=text, 
+                    reply_markup=reply_markup
+                )
+                query.message.delete()
+            
+        else:
+            if query.message.photo:
+                query.message.reply_text(
+                    text=text,
+                    reply_markup=reply_markup
+                )
+                query.message.delete()
+            else:
+                query.edit_message_text(
+                    text=text,
+                    reply_markup=reply_markup
+                )
     else:
-        query.edit_message_text(text="No words")
+        query.edit_message_text(text="No words", reply_markup=back_keyboard_markup())
 
 
 def review_words(update: Update, context: CallbackContext) -> None:
-    query = update.callback_query
-
-    query.answer()
-    user = get_user_data(query.from_user.id)
-    word = get_user_review_word(user.id)
-
-    if word:
-
-        word_keyboard = [
-            [
-                InlineKeyboardButton(
-                    "✅ Known", callback_data=f"known-{word.id}-{user.id}-1"),
-                InlineKeyboardButton(
-                    "♻️ Learn", callback_data=f"learn-{word.id}-{user.id}-2"),
-            ],
-
-        ]
-
-        word_keyboard_markup = InlineKeyboardMarkup(word_keyboard)
-
-        query.edit_message_text(
-            text=f"{word.word}", reply_markup=word_keyboard_markup)
-    else:
-        query.edit_message_text(text="No words")
-
-
-def review_update_words(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
     data = query.data.split('-')
     query.answer()
     if len(data) > 3:
         users_words_create(data[2], data[1], data[3])
+
     user = get_user_data(query.from_user.id)
-    word = get_user_word(user.id)
-    print(word)
+    word = get_user_review_word(user.id, data[1] if len(data) > 1 else None)
+    
     if word:
-        word_keyboard = [
-            [
-                InlineKeyboardButton(
-                    "✅ Known", callback_data=f"known-{word.id}-{user.id}-1"),
-                InlineKeyboardButton(
-                    "♻️ Learn", callback_data=f"learn-{word.id}-{user.id}-2"),
-            ],
-
-        ]
-
-        word_keyboard_markup = InlineKeyboardMarkup(word_keyboard)
-        query.edit_message_text(
-            text=f"{word.word}", reply_markup=word_keyboard_markup)
+        reply_markup = word_keyboard_markup(REVIEW_KEY, word.id, user.id, word.audio)
+        text = word.word
+        if word.photo:
+            if query.message.photo:
+                query.edit_message_media(
+                    media=InputMediaPhoto(word.photo),
+                    caption=text, 
+                    reply_markup=reply_markup
+                )
+            else:
+                query.message.reply_photo(
+                    photo=word.photo, 
+                    caption=text, 
+                    reply_markup=reply_markup
+                )
+                query.message.delete()
+            
+        else:
+            if query.message.photo:
+                query.message.reply_text(
+                    text=text,
+                    reply_markup=reply_markup
+                )
+                query.message.delete()
+            else:
+                query.edit_message_text(
+                    text=text,
+                    reply_markup=reply_markup
+                )
     else:
-        query.edit_message_text(text="No words")
+        query.edit_message_text(text="No words", reply_markup=back_keyboard_markup())
+
+
+def check(update: Update, context: CallbackContext) -> None:
+    query = update.callback_query
+    data = query.data.split('-')
+
+    word_id = data[1]
+    word = get_word(word_id)
+
+    query.answer(word.word_translation, show_alert=True)
+    
+
+def audio(update: Update, context: CallbackContext) -> None:
+    query = update.callback_query
+    data = query.data.split('-')
+    query.answer()
+
+    word_id = data[1]
+    word = get_word(word_id)
+
+    query.message.reply_audio(
+        audio=word.audio, 
+        caption=f"<b>{word.word}</b>\n<i>{word.word_translation}</i>",
+    )
+    
