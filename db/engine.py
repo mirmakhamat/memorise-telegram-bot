@@ -1,3 +1,5 @@
+import os
+DB_URL = os.getenv('DB_URL')
+
 import sqlalchemy as db
-engine = db.create_engine(
-    'postgresql+psycopg2://postgres:postgres@localhost:5432/memorise')
+engine = db.create_engine(DB_URL)
