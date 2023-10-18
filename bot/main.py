@@ -1,10 +1,11 @@
 import logging
-from telegram.ext import Updater, CommandHandler, CallbackQueryHandler
+from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, ConversationHandler, MessageHandler, Filters
 from bot import config
 from bot.handlers import user
 from bot.handlers import word
 from bot.keyboards import user as user_keyboard
 from bot.keyboards import word as word_keyboard
+from bot import states
 
 
 logging.basicConfig(
@@ -30,6 +31,23 @@ def main() -> None:
         CallbackQueryHandler(word.audio, pattern=word_keyboard.AUDIO_KEY),
         CallbackQueryHandler(user.back_to_main, pattern=word_keyboard.BACK_KEY),
         CallbackQueryHandler(user.settings, pattern=user_keyboard.SETTINGS_KEY),
+        CallbackQueryHandler(word.example, pattern=word_keyboard.EXAMPLE_KEY),
+        ConversationHandler(
+            entry_points=[
+                CommandHandler('add', user.add),
+            ],
+            states={
+                states.NEW: [
+                    CallbackQueryHandler(user.back_to_main, pattern=word_keyboard.BACK_KEY),
+                    MessageHandler(Filters.photo | Filters.text, word.add_word),
+                ],
+                states.AUDIO: [
+                    CommandHandler('skip', user.start),
+                    MessageHandler(Filters.audio, word.add_audio),
+                ]
+            },
+            fallbacks=[]
+        )
     ]
 
     for handler in handlers:

@@ -44,6 +44,19 @@ class UsersWordsTable(Base):
     user_id = Column(Integer, ForeignKey('users.id'))
     word_id = Column(Integer, ForeignKey('words.id'))
     status = Column(Enum(StatusEnum))
+    count = Column(Integer, default=0)
+    created_at = Column(DateTime, default=datetime.datetime.now)
+    updated_at = Column(DateTime, default=datetime.datetime.now,
+                        onupdate=datetime.datetime.now)
+
+
+class ExamplesTable(Base):
+    __tablename__ = 'examples'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    word_id = Column(Integer, ForeignKey('words.id'))
+    example = Column(String)
+    example_translation = Column(String)
     created_at = Column(DateTime, default=datetime.datetime.now)
     updated_at = Column(DateTime, default=datetime.datetime.now,
                         onupdate=datetime.datetime.now)

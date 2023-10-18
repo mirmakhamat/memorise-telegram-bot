@@ -9,7 +9,8 @@ SETTINGS_KEY = "settings"
 def main_keyboard_markup():
     main_keyboard = [
         [
-            InlineKeyboardButton("📚 Learning new words", callback_data=NEW_WORDS_KEY),
+            InlineKeyboardButton("📚 Learning new words",
+                                 callback_data=NEW_WORDS_KEY),
         ],
         [InlineKeyboardButton("📖 Review words", callback_data=REVIEW_KEY)],
         [InlineKeyboardButton("⚙️ Settings", callback_data=SETTINGS_KEY)],
